@@ -80,7 +80,7 @@ export class CoC7DholeHouseActorImporter {
           san: {
             value: parseInt(dholeHouseData.Characteristics.Sanity, 10),
             max: parseInt(dholeHouseData.Characteristics.SanityMax, 10),
-            dailyLimit: Math.floor(dholeHouseData.Characteristics.Sanity / 5)
+            breakingPoint: Math.floor(dholeHouseData.Characteristics.Sanity * 4 / 5)
           },
           hp: {
             value: parseInt(dholeHouseData.Characteristics.HitPts, 10),

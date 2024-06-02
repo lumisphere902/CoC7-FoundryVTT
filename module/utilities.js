@@ -426,7 +426,6 @@ export class CoC7Utilities {
         const isCriticalWounds =
           !game.settings.get('CoC7', 'pulpRuleIgnoreMajorWounds') &&
           actor.hasConditionStatus(COC7.status.criticalWounds)
-        const dailySanityLoss = actor.system.attribs.san.dailyLoss
         const hpValue = actor.system.attribs.hp.value
         const hpMax = actor.system.attribs.hp.max
         const mpValue = actor.system.attribs.mp.value
@@ -469,29 +468,18 @@ export class CoC7Utilities {
             })
           }
         }
-        if (dailySanityLoss > 0) {
-          chatContent =
-            chatContent +
-            `<b style="color:darkolivegreen">${game.i18n.localize(
-              'CoC7.dailySanLossRestarted'
-            )}.</b>`
-          actor.update({
-            'system.attribs.san.dailyLoss': 0,
-            'system.attribs.san.dailyLimit': Math.floor(actor.system.attribs.san.value / 5)
-          })
-        }
-        const hours = 7
-        if (hours > 0 && mpValue < mpMax) {
-          let magicAmount = hours * Math.ceil(pow / 100)
-          magicAmount = Math.min(magicAmount, mpMax - mpValue)
+        if (mpValue < mpMax) {
           chatContent =
             chatContent +
             `<b style="color:darkolivegreen">${game.i18n.format(
               'CoC7.magicPointsRecovered'
-            )}: ${magicAmount}.</b>`
+            )}.</b>`
+          const r = new Roll("1d6")
+          await r.roll({ async: true })
+          CoC7Dice.showRollDice3d(r)
+
           actor.update({
-            'system.attribs.mp.value':
-              actor.system.attribs.mp.value + magicAmount
+            'system.attribs.mp.value': Math.floor(mpMax, mpValue + r.total)
           })
         }
       }

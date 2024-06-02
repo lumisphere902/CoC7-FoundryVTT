@@ -60,8 +60,7 @@
 
       <div class="status" style="flex: 0 0 3em;">
         <div class="invisible">
-          <input class="locked" type="text" name="system.attribs.san.dailyLoss" value="{{data.system.attribs.san.dailyLoss}}" data-dtype="Number" readonly />
-          <input class="locked" type="text" name="system.attribs.san.dailyLimit" value="{{data.system.attribs.san.dailyLimit}}" data-dtype="Number" readonly />
+          <input class="locked" type="text" name="system.attribs.san.breakingPoint" value="{{data.system.attribs.san.breakingPoint}}" data-dtype="Number" readonly />
         </div>
         <a class="condition-monitor {{#if data.system.conditions.tempoInsane.value}}status-on{{/if}}" title="{{localize 'CoC7.BoutOfMadness'}}{{#if actor.getTempoInsaneDurationText}}: {{actor.getTempoInsaneDurationText}}{{/if}}" data-condition="tempoInsane"><i class="game-icon game-icon-hanging-spider"></i></a>
         <a class="condition-monitor {{#if data.system.conditions.indefInsane.value}}status-on{{/if}}" title="{{#if data.system.conditions.indefInsane.value}}{{localize 'CoC7.UnderlyingInsanity'}}{{else}}{{localize 'CoC7.IndefiniteInsanity'}}{{/if}}" data-condition="indefInsane"><i class="game-icon game-icon-tentacles-skull"></i></a>

@@ -106,7 +106,7 @@ export class CoCActor extends Actor {
      * actor.data.attribs.san.oneFifthSanity to be removed from template
      * and indefiniteInsanityLevel to be removed from template
      */
-      if (typeof this.system.attribs.san.dailyLimit === 'undefined') {
+      if (typeof this.system.attribs.san.breakingPoint === 'undefined') {
         if (this.system.attribs.san.oneFifthSanity) {
           const s = this.system.attribs.san.oneFifthSanity.split('/')
           if (s[1] && !isNaN(Number(s[1]))) {
@@ -115,7 +115,7 @@ export class CoCActor extends Actor {
             this.system.attribs.san.dailyLimit = 0
           }
         } else {
-          this.system.attribs.san.dailyLimit = 0
+          this.system.attribs.san.breakingPoint = 0
         }
       }
 
@@ -1198,8 +1198,8 @@ export class CoCActor extends Actor {
               if (data.system.characteristics.values.pow) {
                 updateData['system.attribs.san.value'] =
                   data.system.characteristics.values.pow
-                updateData['system.attribs.san.dailyLimit'] = Math.floor(
-                  data.system.characteristics.values.pow / 5
+                updateData['system.attribs.san.breakingPoint'] = Math.floor(
+                  data.system.characteristics.values.pow * 4 / 5
                 )
                 updateData['system.attribs.mp.max'] = Math.floor(
                   data.system.characteristics.values.pow / 5
@@ -1991,6 +1991,10 @@ export class CoCActor extends Actor {
     return this.system.attribs.san?.dailyLimit || 0
   }
 
+  get breakingPoint () {
+    return this.system.attribs.san?.breakingPoint || 0
+  }
+
   get rawSanMax () {
     if (!this.system.attribs) return undefined
     if (this.system.attribs?.san?.auto) {
@@ -2134,18 +2138,14 @@ export class CoCActor extends Actor {
     const loss = parseInt(this.system.attribs.san.value) - value
 
     if (loss > 0) {
-      let totalLoss = parseInt(this.system.attribs.san.dailyLoss)
-        ? parseInt(this.system.attribs.san.dailyLoss)
-        : 0
-      totalLoss = totalLoss + loss
       if (loss >= 5) await this.setCondition(COC7.status.tempoInsane)
-      if (totalLoss >= this.system.attribs.san.dailyLimit) {
-        await this.setCondition(COC7.status.indefInsane)
-      }
       await this.update({
-        'system.attribs.san.value': value,
-        'system.attribs.san.dailyLoss': totalLoss
+        'system.attribs.san.value': value
       })
+      if (value <= this.system.attribs.san.breakingPoint) {
+        await this.setCondition(COC7.status.indefInsane)
+        await this.resetDailySanity();
+      }
     } else await this.update({ 'system.attribs.san.value': value })
     return value
   }
@@ -3463,11 +3463,17 @@ export class CoCActor extends Actor {
 
   async resetDailySanity () {
     await this.update({
-      'system.attribs.san.dailyLimit': Math.floor(
-        this.system.attribs.san.value / 5
-      ),
-      'system.attribs.san.dailyLoss': 0
+      'system.attribs.san.breakingPoint': Math.floor(
+        this.system.attribs.san.value * 4 / 5
+      )
     })
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker(),
+      content: `${this.name} has reached their breaking point. They gain a disorder and their new breaking point is ${Math.floor(this.system.attribs.san.value * 4 / 5)}.`,
+      type: CONST.CHAT_MESSAGE_TYPES.OTHER
+    }
+    ChatMessage.create(chatData)
   }
 
   get fightingSkills () {
